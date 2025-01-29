@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Genres</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"></script>
+</head>
+<body>
+    <h2>Genres</h2>
+    <form name="genreForm">
+        <input type="hidden" name="Id" value="0" />
+        <div class="form-group col-md-5">
+            <label for="title">Title:</label>
+            <input class="form-control" name="title" />
+        </div>
+
+        <div class="panel-body">
+            <a id="submit" class="btn btn-success">Save</a>
+            <a id="reset" class="btn btn-danger">Clear</a>
+        </div>
+    </form>
+    <table class="table table-condensed table-striped col-md-6">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+
+        // загрузка студентов
+        GetGenres();
+
+        // Получение всех студентов
+        function GetGenres() {
+            $.ajax({
+                url: 'https://localhost:7110/api/genres',
+                method: "GET",
+                contentType: "application/json",
+                success: function (genres) {
+
+                    let rows = "";
+                    $.each(genres, function (index, genre) {
+                        // добавляем полученные элементы в таблицу
+                        rows += row(genre);
+                    })
+                    $("table tbody").append(rows);
+                },
+                error: function (x) {
+                    alert(x.status);
+                }
+            });
+        }
+
+        // Получение одного студента
+        function GetGenre(id) {
+            $.ajax({
+                url: 'https://localhost:7110/api/genres/' + id,
+                method: 'GET',
+                contentType: "application/json",
+                success: function (genre) {
+                    let form = document.forms["genreForm"];
+                    form.elements["Id"].value = genre.id;
+                    form.elements["title"].value = genre.title;                   
+                },
+                error: function (x) {
+                    alert(x.status);
+                }
+            });
+        }
+
+        // Добавление студента
+        function CreateGenre(genreTitle) {
+            $.ajax({
+                url: "https://localhost:7110/api/genres",
+                contentType: "application/json",
+                method: "POST",
+                data: JSON.stringify({
+                    title: genreTitle
+                }),
+                success: function (genre) {
+                    $("table tbody").append(row(genre));
+                    let form = document.forms["genreForm"];
+                    form.reset();
+                    form.elements["Id"].value = 0;
+                },
+                error: function (x) {
+                    alert(x.status);
+                }
+            })
+        }
+
+        // Изменение студента
+        function EditGenre(genreId, genreTitle) {
+            let request = JSON.stringify({
+                id: genreId,
+                title: genreTitle
+            });
+            $.ajax({
+                url: "https://localhost:7110/api/genres",
+                contentType: "application/json",
+                method: "PUT",
+                data: request,
+                success: function (genre) {
+                    $("tr[data-rowid='" + genre.id + "']").replaceWith(row(genre));
+                    let form = document.forms["genreForm"];
+                    form.reset();
+                    form.elements["Id"].value = 0;
+                },
+                error: function (x) {
+                    alert(x.status);
+                }
+            })
+        }
+
+
+        // Удаление студента
+        function DeleteGenre(id) {
+            if (!confirm("Do you really want to delete this genre?"))
+                return;
+            $.ajax({
+                url: "https://localhost:7110/api/genres/" + id,
+                contentType: "application/json",
+                method: "DELETE",
+                success: function (genre) {
+                    $("tr[data-rowid='" + genre.id + "']").remove();
+                },
+                error: function (x, y, z) {
+                    alert(x.status + '\n' + y + '\n' + z);
+                }
+            })
+        }
+
+        // создание строки для таблицы
+        let row = function (genre) {
+            return "<tr data-rowid='" + genre.id + "'><td>" + genre.id + "</td>" +
+                "<td>" + genre.title + "</td><td>" + 
+                "<td><a class='editLink' data-id='" + genre.id + "'>Edit</a> | " +
+                "<a class='removeLink' data-id='" + genre.id + "'>Delete</a></td></tr>";
+        };
+
+        // сброс значений формы
+        $("#reset").click(function (e) {
+            e.preventDefault();
+            let form = document.forms["genreForm"];
+            form.reset();
+            form.elements["Id"].value = 0;
+        });
+
+        // отправка формы
+        $("#submit").click(function (e) {
+            e.preventDefault();
+            let form = document.forms["genreForm"];
+            let id = form.elements["Id"].value;
+            let title = form.elements["title"].value;
+            
+            if (id == 0)
+                CreateGenre(title);
+            else
+                EditGenre(id, title);
+        });
+
+        // нажимаем на ссылку Изменить
+        $("body").on("click", ".editLink", function () {
+            let id = $(this).data("id");
+            GetGenre(id);
+        });
+
+        // нажимаем на ссылку Удалить
+        $("body").on("click", ".removeLink", function () {
+            let id = $(this).data("id");
+            DeleteGenre(id);
+        });
+
+    </script>
+</body>
+</html>

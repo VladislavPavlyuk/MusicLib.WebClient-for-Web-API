@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Список студентов</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"></script>
+</head>
+<body>
+    <h2>Список студентов</h2>
+    <form name="studentForm">
+        <input type="hidden" name="Id" value="0" />
+        <div class="form-group col-md-5">
+            <label for="name">Имя:</label>
+            <input class="form-control" name="name" />
+        </div>
+        <div class="form-group col-md-5">
+            <label for="surname">Фамилия:</label>
+            <input class="form-control" name="surname" />
+        </div>
+        <div class="form-group col-md-5">
+            <label for="age">Возраст:</label>
+            <input class="form-control" name="age" />
+        </div>
+        <div class="form-group col-md-5">
+            <label for="gpa">Средний балл:</label>
+            <input class="form-control" name="gpa" />
+        </div>
+        <div class="panel-body">
+            <a id="submit" class="btn btn-primary">Сохранить</a>
+            <a id="reset" class="btn btn-primary">Сбросить</a>
+        </div>
+    </form>
+    <table class="table table-condensed table-striped col-md-6">
+        <thead><tr><th>Id</th><th>Имя</th><th>Фамилия</th><th>Возраст</th><th>Средний балл</th><th></th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+
+        // загрузка студентов
+        GetStudents();
+
+        // Получение всех студентов
+        function GetStudents() {
+            $.ajax({
+                url: 'https://localhost:7110/api/students',
+                method: "GET",
+                contentType: "application/json",
+                success: function (students) {
+
+                    let rows = "";
+                    $.each(students, function (index, student) {
+                        // добавляем полученные элементы в таблицу
+                        rows += row(student);
+                    })
+                    $("table tbody").append(rows);
+                },
+                error: function (x) {
+                    alert(x.status);
+                }
+            });
+        }
+
+        // Получение одного студента
+        function GetStudent(id) {
+            $.ajax({
+                url: 'https://localhost:7110/api/students/' + id,
+                method: 'GET',
+                contentType: "application/json",
+                success: function (student) {
+                    let form = document.forms["studentForm"];
+                    form.elements["Id"].value = student.id;
+                    form.elements["name"].value = student.name;
+                    form.elements["surname"].value = student.surname;
+                    form.elements["age"].value = student.age;
+                    form.elements["gpa"].value = student.gpa;
+                },
+                error: function (x) {
+                    alert(x.status);
+                }
+            });
+        }
+
+        // Добавление студента
+        function CreateStudent(studentName, studentSurname, studentAge, studentGPA) {
+            $.ajax({
+                url: "https://localhost:7110/api/students",
+                contentType: "application/json",
+                method: "POST",
+                data: JSON.stringify({
+                    name: studentName,
+                    surname: studentSurname,
+                    age: studentAge,
+                    gpa: studentGPA
+                }),
+                success: function (student) {
+                    $("table tbody").append(row(student));
+                    let form = document.forms["studentForm"];
+                    form.reset();
+                    form.elements["Id"].value = 0;
+                },
+                error: function (x) {
+                    alert(x.status);
+                }
+            })
+        }
+
+        // Изменение студента
+        function EditStudent(studentId, studentName, studentSurname, studentAge, studentGPA) {
+            let request = JSON.stringify({
+                id: studentId,
+                name: studentName,
+                surname: studentSurname,
+                age: studentAge,
+                gpa: studentGPA
+            });
+            $.ajax({
+                url: "https://localhost:7110/api/students",
+                contentType: "application/json",
+                method: "PUT",
+                data: request,
+                success: function (student) {
+                    $("tr[data-rowid='" + student.id + "']").replaceWith(row(student));
+                    let form = document.forms["studentForm"];
+                    form.reset();
+                    form.elements["Id"].value = 0;
+                },
+                error: function (x) {
+                    alert(x.status);
+                }
+            })
+        }
+
+
+        // Удаление студента
+        function DeleteStudent(id) {
+            if (!confirm("Вы действительно желаете удалить студента?"))
+                return;
+            $.ajax({
+                url: "https://localhost:7110/api/students/" + id,
+                contentType: "application/json",
+                method: "DELETE",
+                success: function (student) {
+                    $("tr[data-rowid='" + student.id + "']").remove();
+                },
+                error: function (x, y, z) {
+                    alert(x.status + '\n' + y + '\n' + z);
+                }
+            })
+        }
+
+        // создание строки для таблицы
+        let row = function (student) {
+            return "<tr data-rowid='" + student.id + "'><td>" + student.id + "</td>" +
+                "<td>" + student.name + "</td> <td>" + student.surname + "</td>" +
+                "<td>" + student.age + "</td> <td>" + student.gpa + "</td>" +
+                "<td><a class='editLink' data-id='" + student.id + "'>Изменить</a> | " +
+                "<a class='removeLink' data-id='" + student.id + "'>Удалить</a></td></tr>";
+        };
+
+        // сброс значений формы
+        $("#reset").click(function (e) {
+            e.preventDefault();
+            let form = document.forms["studentForm"];
+            form.reset();
+            form.elements["Id"].value = 0;
+        });
+
+        // отправка формы
+        $("#submit").click(function (e) {
+            e.preventDefault();
+            let form = document.forms["studentForm"];
+            let id = form.elements["Id"].value;
+            let name = form.elements["name"].value;
+            let surname = form.elements["surname"].value;
+            let age = form.elements["age"].value;
+            let gpa = form.elements["gpa"].value;
+            if (id == 0)
+                CreateStudent(name, surname, age, gpa);
+            else
+                EditStudent(id, name, surname, age, gpa);
+        });
+
+        // нажимаем на ссылку Изменить
+        $("body").on("click", ".editLink", function () {
+            let id = $(this).data("id");
+            GetStudent(id);
+        });
+
+        // нажимаем на ссылку Удалить
+        $("body").on("click", ".removeLink", function () {
+            let id = $(this).data("id");
+            DeleteStudent(id);
+        });
+
+    </script>
+</body>
+</html>
