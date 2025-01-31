@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicLib WebClient for Web API</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">MusicLib WebClient for Web API</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a onclick="rolesRun()">Roles</a></li>
+                <li><a onclick="usersRun()">Users</a></li>
+                <li><a onclick="genresRun()">Genres</a></li>
+                <li><a onclick="songsRun()">Songs</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="contentRoles"></div>
+    <div id="contentGenres"></div>
+
+    <script>
+
+        function rolesRun() {
+            // Insert the new element into the DOM
+            document.getElementById('contentRoles').appendChild(rolesElement);
+        }
+        function usersRun() {
+            alert("users!");
+        }
+        function genresRun() {
+            // Insert the new element into the DOM
+            document.getElementById('contentGenres').appendChild(genresElement);
+        }
+        function songsRun() {
+            alert("songs!");
+        }
+
+    </script>
+    <script src="genres.js"></script>
+    <script src="roles.js"></script>
+    
+
+</body>
+</html>

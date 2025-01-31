@@ -3,13 +3,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>Roles</title>
+    <title>Genres</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"></script>
 </head>
 <body>
-    <h2>Roles</h2>
-    <form name="roleForm">
+    <h2>Genres</h2>
+    <form name="genreForm">
         <input type="hidden" name="Id" value="0" />
         <div class="form-group col-md-5">
             <label for="title">Title:</label>
@@ -24,7 +25,6 @@
     <table class="table table-condensed table-striped col-md-6">
         <thead>
         <tr>
-            <th>Id</th>
             <th>Title</th>
             <th></th>
             </tr>
@@ -35,20 +35,20 @@
     <script>
 
         // загрузка студентов
-        GetRoles();
+        GetGenres();
 
         // Получение всех студентов
-        function GetRoles() {
+        function GetGenres() {
             $.ajax({
-                url: 'https://localhost:7110/api/roles',
+                url: 'https://localhost:7110/api/genres',
                 method: "GET",
                 contentType: "application/json",
-                success: function (roles) {
+                success: function (genres) {
 
                     let rows = "";
-                    $.each(roles, function (index, role) {
+                    $.each(genres, function (index, genre) {
                         // добавляем полученные элементы в таблицу
-                        rows += row(role);
+                        rows += row(genre);
                     })
                     $("table tbody").append(rows);
                 },
@@ -59,15 +59,15 @@
         }
 
         // Получение одного студента
-        function GetRole(id) {
+        function GetGenre(id) {
             $.ajax({
-                url: 'https://localhost:7110/api/roles/' + id,
+                url: 'https://localhost:7110/api/genres/' + id,
                 method: 'GET',
                 contentType: "application/json",
-                success: function (role) {
-                    let form = document.forms["roleForm"];
-                    form.elements["Id"].value = role.id;
-                    form.elements["title"].value = role.title;                   
+                success: function (genre) {
+                    let form = document.forms["genreForm"];
+                    form.elements["Id"].value = genre.id;
+                    form.elements["title"].value = genre.title;                   
                 },
                 error: function (x) {
                     alert(x.status);
@@ -76,17 +76,17 @@
         }
 
         // Добавление студента
-        function CreateRole(roleTitle) {
+        function CreateGenre(genreTitle) {
             $.ajax({
-                url: "https://localhost:7110/api/roles",
+                url: "https://localhost:7110/api/genres",
                 contentType: "application/json",
                 method: "POST",
                 data: JSON.stringify({
-                    title: roleTitle
+                    title: genreTitle
                 }),
-                success: function (role) {
-                    $("table tbody").append(row(role));
-                    let form = document.forms["roleForm"];
+                success: function (genre) {
+                    $("table tbody").append(row(genre));
+                    let form = document.forms["genreForm"];
                     form.reset();
                     form.elements["Id"].value = 0;
                 },
@@ -97,19 +97,19 @@
         }
 
         // Изменение студента
-        function EditRole(roleId, roleTitle) {
+        function EditGenre(genreId, genreTitle) {
             let request = JSON.stringify({
-                id: roleId,
-                title: roleTitle
+                id: genreId,
+                title: genreTitle
             });
             $.ajax({
-                url: "https://localhost:7110/api/roles",
+                url: "https://localhost:7110/api/genres",
                 contentType: "application/json",
                 method: "PUT",
                 data: request,
-                success: function (role) {
-                    $("tr[data-rowid='" + role.id + "']").replaceWith(row(role));
-                    let form = document.forms["roleForm"];
+                success: function (genre) {
+                    $("tr[data-rowid='" + genre.id + "']").replaceWith(row(genre));
+                    let form = document.forms["genreForm"];
                     form.reset();
                     form.elements["Id"].value = 0;
                 },
@@ -121,15 +121,15 @@
 
 
         // Удаление студента
-        function DeleteRole(id) {
-            if (!confirm("Do you really want to delete this role?"))
+        function DeleteGenre(id) {
+            if (!confirm("Do you really want to delete this genre?"))
                 return;
             $.ajax({
-                url: "https://localhost:7110/api/roles/" + id,
+                url: "https://localhost:7110/api/genres/" + id,
                 contentType: "application/json",
                 method: "DELETE",
-                success: function (role) {
-                    $("tr[data-rowid='" + role.id + "']").remove();
+                success: function (genre) {
+                    $("tr[data-rowid='" + genre.id + "']").remove();
                 },
                 error: function (x, y, z) {
                     alert(x.status + '\n' + y + '\n' + z);
@@ -138,17 +138,17 @@
         }
 
         // создание строки для таблицы
-        let row = function (role) {
-            return "<tr data-rowid='" + role.id + "'><td>" + role.id + "</td>" +
-                "<td>" + role.title + "</td><td>" + 
-                "<td><a class='editLink' data-id='" + role.id + "'>Edit</a> | " +
-                "<a class='removeLink' data-id='" + role.id + "'>Delete</a></td></tr>";
+        let row = function (genre) {
+            return "<tr data-rowid='" + genre.id + "'>" +
+                "<td>" + genre.title + "</td><td>" + 
+                "<td><a class='editLink btn btn-warning' data-id='" + genre.id + "'>Edit</a> " +
+                "<a class='removeLink btn btn-danger' data-id='" + genre.id + "'>Delete</a></td></tr>";
         };
 
         // сброс значений формы
         $("#reset").click(function (e) {
             e.preventDefault();
-            let form = document.forms["roleForm"];
+            let form = document.forms["genreForm"];
             form.reset();
             form.elements["Id"].value = 0;
         });
@@ -156,26 +156,26 @@
         // отправка формы
         $("#submit").click(function (e) {
             e.preventDefault();
-            let form = document.forms["roleForm"];
+            let form = document.forms["genreForm"];
             let id = form.elements["Id"].value;
             let title = form.elements["title"].value;
             
             if (id == 0)
-                CreateRole(title);
+                CreateGenre(title);
             else
-                EditRole(id, title);
+                EditGenre(id, title);
         });
 
         // нажимаем на ссылку Изменить
         $("body").on("click", ".editLink", function () {
             let id = $(this).data("id");
-            GetRole(id);
+            GetGenre(id);
         });
 
         // нажимаем на ссылку Удалить
         $("body").on("click", ".removeLink", function () {
             let id = $(this).data("id");
-            DeleteRole(id);
+            DeleteGenre(id);
         });
 
     </script>

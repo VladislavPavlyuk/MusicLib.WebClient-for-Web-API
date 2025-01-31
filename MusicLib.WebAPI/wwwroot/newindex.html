@@ -3,19 +3,26 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>Genres</title>
+    <title>Universal</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"></script>
 </head>
 <body>
-    <h2>Genres</h2>
-    <form name="genreForm">
+    <h2>Universal</h2>
+    <form name="uniForm">
         <input type="hidden" name="Id" value="0" />
         <div class="form-group col-md-5">
-            <label for="title">Title:</label>
-            <input class="form-control" name="title" />
+            <label for="first">Title:</label>
+            <input class="form-control" name="first" />
         </div>
-
+        <div class="form-group col-md-5">
+            <label for="second">Artist:</label>
+            <input class="form-control" name="second" />
+        </div>
+        <div class="form-group col-md-5">
+            <label for="third">Genre:</label>
+            <input class="form-control" name="third" />
+        </div>
         <div class="panel-body">
             <a id="submit" class="btn btn-success">Save</a>
             <a id="reset" class="btn btn-danger">Clear</a>
@@ -23,10 +30,12 @@
     </form>
     <table class="table table-condensed table-striped col-md-6">
         <thead>
-        <tr>
-            <th>Id</th>
-            <th>Title</th>
-            <th></th>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Genre</th>
+                <th></th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -35,20 +44,20 @@
     <script>
 
         // загрузка студентов
-        GetGenres();
+        GetSongs();
 
         // Получение всех студентов
-        function GetGenres() {
+        function GetSongs() {
             $.ajax({
-                url: 'https://localhost:7110/api/genres',
+                url: 'https://localhost:7110/api/songs',
                 method: "GET",
                 contentType: "application/json",
-                success: function (genres) {
+                success: function (songs) {
 
                     let rows = "";
-                    $.each(genres, function (index, genre) {
+                    $.each(songs, function (index, song) {
                         // добавляем полученные элементы в таблицу
-                        rows += row(genre);
+                        rows += row(song);
                     })
                     $("table tbody").append(rows);
                 },
@@ -59,15 +68,17 @@
         }
 
         // Получение одного студента
-        function GetGenre(id) {
+        function GetSong(id) {
             $.ajax({
-                url: 'https://localhost:7110/api/genres/' + id,
+                url: 'https://localhost:7110/api/songs/' + id,
                 method: 'GET',
                 contentType: "application/json",
-                success: function (genre) {
-                    let form = document.forms["genreForm"];
-                    form.elements["Id"].value = genre.id;
-                    form.elements["title"].value = genre.title;                   
+                success: function (song) {
+                    let form = document.forms["uniForm"];
+                    form.elements["Id"].value = song.id;
+                    form.elements["first"].value = song.title;
+                    form.elements["second"].value = song.artist;
+                    form.elements["third"].value = song.genre;
                 },
                 error: function (x) {
                     alert(x.status);
@@ -76,17 +87,19 @@
         }
 
         // Добавление студента
-        function CreateGenre(genreTitle) {
+        function CreateSong(songTitle, songArtist, songGenre) {
             $.ajax({
-                url: "https://localhost:7110/api/genres",
+                url: "https://localhost:7110/api/songs",
                 contentType: "application/json",
                 method: "POST",
                 data: JSON.stringify({
-                    title: genreTitle
+                    first: songTitle,
+                    second: songArtist,
+                    third: songGenre
                 }),
-                success: function (genre) {
-                    $("table tbody").append(row(genre));
-                    let form = document.forms["genreForm"];
+                success: function (song) {
+                    $("table tbody").append(row(song));
+                    let form = document.forms["uniForm"];
                     form.reset();
                     form.elements["Id"].value = 0;
                 },
@@ -97,19 +110,21 @@
         }
 
         // Изменение студента
-        function EditGenre(genreId, genreTitle) {
+        function EditSong(songId, songTitle, songArtist, songGenre) {
             let request = JSON.stringify({
-                id: genreId,
-                title: genreTitle
+                id: songId,
+                first: songTitle,
+                second: songArtist,
+                third: songGenre
             });
             $.ajax({
-                url: "https://localhost:7110/api/genres",
+                url: "https://localhost:7110/api/songs",
                 contentType: "application/json",
                 method: "PUT",
                 data: request,
-                success: function (genre) {
-                    $("tr[data-rowid='" + genre.id + "']").replaceWith(row(genre));
-                    let form = document.forms["genreForm"];
+                success: function (song) {
+                    $("tr[data-rowid='" + song.id + "']").replaceWith(row(song));
+                    let form = document.forms["uniForm"];
                     form.reset();
                     form.elements["Id"].value = 0;
                 },
@@ -121,15 +136,15 @@
 
 
         // Удаление студента
-        function DeleteGenre(id) {
-            if (!confirm("Do you really want to delete this genre?"))
+        function DeleteSong(id) {
+            if (!confirm("Do you really want to delete this song?"))
                 return;
             $.ajax({
-                url: "https://localhost:7110/api/genres/" + id,
+                url: "https://localhost:7110/api/songs/" + id,
                 contentType: "application/json",
                 method: "DELETE",
-                success: function (genre) {
-                    $("tr[data-rowid='" + genre.id + "']").remove();
+                success: function (song) {
+                    $("tr[data-rowid='" + song.id + "']").remove();
                 },
                 error: function (x, y, z) {
                     alert(x.status + '\n' + y + '\n' + z);
@@ -138,17 +153,18 @@
         }
 
         // создание строки для таблицы
-        let row = function (genre) {
-            return "<tr data-rowid='" + genre.id + "'><td>" + genre.id + "</td>" +
-                "<td>" + genre.title + "</td><td>" + 
-                "<td><a class='editLink' data-id='" + genre.id + "'>Edit</a> | " +
-                "<a class='removeLink' data-id='" + genre.id + "'>Delete</a></td></tr>";
+        let row = function (song) {
+            return "<tr data-rowid='" + song.id + "'><td>" + song.id + "</td>" +
+                "<td>" + song.title + "</td> <td>" + song.artist + "</td>" +
+                "<td>" + song.genre + "</td> <td>" +
+                "<td><a class='btn btn-warning' data-id='" + song.id + "'>Edit</a> | " +
+                "<a class='btn btn-danger' data-id='" + song.id + "'>Delete</a></td></tr>";
         };
 
         // сброс значений формы
         $("#reset").click(function (e) {
             e.preventDefault();
-            let form = document.forms["genreForm"];
+            let form = document.forms["uniForm"];
             form.reset();
             form.elements["Id"].value = 0;
         });
@@ -156,26 +172,28 @@
         // отправка формы
         $("#submit").click(function (e) {
             e.preventDefault();
-            let form = document.forms["genreForm"];
+            let form = document.forms["uniForm"];
             let id = form.elements["Id"].value;
-            let title = form.elements["title"].value;
-            
+            let first = form.elements["first"].value;
+            let second = form.elements["second"].value;
+            let third = form.elements["third"].value;
+
             if (id == 0)
-                CreateGenre(title);
+                CreateSong(first, second, third);
             else
-                EditGenre(id, title);
+                EditSong(id, first, second, third);
         });
 
         // нажимаем на ссылку Изменить
         $("body").on("click", ".editLink", function () {
             let id = $(this).data("id");
-            GetGenre(id);
+            GetSong(id);
         });
 
         // нажимаем на ссылку Удалить
         $("body").on("click", ".removeLink", function () {
             let id = $(this).data("id");
-            DeleteGenre(id);
+            DeleteSong(id);
         });
 
     </script>

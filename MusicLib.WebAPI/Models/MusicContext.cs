@@ -5,10 +5,8 @@ namespace MusicLib.WebAPI.Models
     public class MusicContext : DbContext
     {
         public DbSet<Role> Roles { get; set; }
-
         public DbSet<Genre> Genres { get; set; }
-        public DbSet<Song> Songs { get; set; }
-        
+        public DbSet<Song> Songs { get; set; }        
         public DbSet<User> Users { get; set; }
         public MusicContext(DbContextOptions<MusicContext> options)
             : base(options)
@@ -23,6 +21,7 @@ namespace MusicLib.WebAPI.Models
                 {
                     Email = "admin@admin.com",
                     Password = "admin",
+                    Salt = "salt",
                     RoleId = 1
                 });
                 Genres?.Add(new Genre
