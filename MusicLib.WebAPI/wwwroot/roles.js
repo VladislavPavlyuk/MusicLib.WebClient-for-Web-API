@@ -1,22 +1,4 @@
-﻿// Create a new Roles HTML element
-const rolesElement = document.createElement('div');
-
-rolesElement.innerHTML = '<h2>Roles</h2>' +
-    '<form name = "roleForm">' +
-    '<input type="hidden" name="Id" value="0" />' +
-    '<div class="form-group col-md-5">' +
-    '<label for="title">Title:</label>' +
-    '<input class="form-control" name="title" /></div>' +
-    '<div class="panel-body">' +
-    '<a id="submit" class="btn btn-success">Save</a>' + ' ' +
-    '<a id="reset" class="btn btn-danger">Clear</a></div>' +
-    '</form >' +
-    '<table name = "rolesTable" class="table table-condensed table-striped col-md-6">' +
-    '<thead><tr><th>Id</th><th>Title</th><th></th></tr></thead>' +
-    '<tbody></tbody>' +
-    '</table>';
-
-// загрузка студентов
+﻿// загрузка студентов
 GetRoles();
 
 // Получение всех студентов
@@ -30,9 +12,9 @@ function GetRoles() {
             let rows = "";
             $.each(roles, function (index, role) {
                 // добавляем полученные элементы в таблицу
-                rows += row(role);
+                rows += rowRole(role);
             })
-            $("table tbody").append(rows);
+            $('#tbodyRoles').append(rows);
         },
         error: function (x) {
             alert(x.status);
@@ -67,7 +49,7 @@ function CreateRole(roleTitle) {
             title: roleTitle
         }),
         success: function (role) {
-            $("table tbody").append(row(role));
+            $("table tbody").append(rowRole(role));
             let form = document.forms["roleForm"];
             form.reset();
             form.elements["Id"].value = 0;
@@ -90,7 +72,7 @@ function EditRole(roleId, roleTitle) {
         method: "PUT",
         data: request,
         success: function (role) {
-            $("tr[data-rowid='" + role.id + "']").replaceWith(row(role));
+            $("tr[data-rowid='" + role.id + "']").replaceWith(rowRole(role));
             let form = document.forms["roleForm"];
             form.reset();
             form.elements["Id"].value = 0;
@@ -110,8 +92,9 @@ function DeleteRole(id) {
         url: "https://localhost:7110/api/roles/" + id,
         contentType: "application/json",
         method: "DELETE",
+        
         success: function (role) {
-            $("tr[data-rowid='" + role.id + "']").remove();
+            $("#tableRoles tr[data-rowid='" + role.id + "']").remove();
         },
         error: function (x, y, z) {
             alert(x.status + '\n' + y + '\n' + z);
@@ -120,15 +103,15 @@ function DeleteRole(id) {
 }
 
 // создание строки для таблицы
-let row = function (role) {
-    return "<tr data-rowid='" + role.id + "'><td>" + role.id + "</td>" +
+let rowRole = function (role) {
+    return "<tr data-rowid='" + role.id + "'>" +
         "<td>" + role.title + "</td><td>" +
-        "<td><a class='editLink' data-id='" + role.id + "'>Edit</a> | " +
-        "<a class='removeLink' data-id='" + role.id + "'>Delete</a></td></tr>";
+        "<td><a class='editLink btn btn-warning' data-id='" + role.id + "'>Edit</a>  " +
+        "<a class='removeLink btn btn-danger' data-id='" + role.id + "'>Delete</a></td></tr>";
 };
 
 // сброс значений формы
-$("#reset").click(function (e) {
+$("#resetRole").click(function (e) {
     e.preventDefault();
     let form = document.forms["roleForm"];
     form.reset();
@@ -136,7 +119,7 @@ $("#reset").click(function (e) {
 });
 
 // отправка формы
-$("#submit").click(function (e) {
+$("#submitRole").click(function (e) {
     e.preventDefault();
     let form = document.forms["roleForm"];
     let id = form.elements["Id"].value;
@@ -149,13 +132,13 @@ $("#submit").click(function (e) {
 });
 
 // нажимаем на ссылку Изменить
-$("body").on("click", ".editLink", function () {
+$('#tbodyRoles').on("click", ".editLink", function () {
     let id = $(this).data("id");
     GetRole(id);
 });
 
 // нажимаем на ссылку Удалить
-$("body").on("click", ".removeLink", function () {
+$('#tbodyRoles').on("click", ".removeLink", function () {
     let id = $(this).data("id");
     DeleteRole(id);
 });
