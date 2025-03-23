@@ -1,7 +1,7 @@
-﻿// загрузка студентов
+﻿// загрузка всех при запуске страницы
 GetSongs();
 
-// Получение всех студентов
+// Получение всех
 function GetSongs() {
     $.ajax({
         url: 'https://localhost:7110/api/songs',
@@ -22,7 +22,7 @@ function GetSongs() {
     });
 }
 
-// Получение одного студента
+// Получение одного 
 function GetSong(id) {
     $.ajax({
         url: 'https://localhost:7110/api/songs/' + id,
@@ -41,7 +41,7 @@ function GetSong(id) {
     });
 }
 
-// Добавление студента
+// Добавление одного
 function CreateSong(songTitle, songArtist, songGenreId) {
     $.ajax({
         url: "https://localhost:7110/api/songs",
